@@ -9,6 +9,7 @@ export interface CustomerSession {
   thread_id: string;
   status: SessionStatus;
   attempts: number;
+  language: string;
   last_interaction: string;
   created_at: string;
 }

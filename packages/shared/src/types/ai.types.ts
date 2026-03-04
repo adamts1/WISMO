@@ -6,6 +6,7 @@ export const WismoClassificationSchema = z.object({
   zip_code: z.string().nullable(),
   has_ambiguity: z.boolean(),
   auto_reply: z.string().nullable(),
+  language: z.string(),
 });
 
 export type WismoClassification = z.infer<typeof WismoClassificationSchema>;
@@ -23,4 +24,5 @@ export interface OpenSessionInput {
   order_number: string;
   attempts: number;
   status: string;
+  language: string;
 }

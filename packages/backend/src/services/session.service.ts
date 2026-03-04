@@ -3,7 +3,7 @@ import type { CustomerSession, SessionStatus } from '@oytiot/shared';
 
 export async function getSessionByThreadId(threadId: string): Promise<CustomerSession | null> {
   return queryOne<CustomerSession>(
-    `SELECT id, customer_email, thread_id, status, attempts, last_interaction, created_at
+    `SELECT id, customer_email, thread_id, status, attempts, language, last_interaction, created_at
      FROM customer_sessions
      WHERE thread_id = $1
      LIMIT 1`,
@@ -15,14 +15,16 @@ export async function createSession(
   customerEmail: string,
   threadId: string,
   status: SessionStatus = 'waiting_for_order_number',
+  language: string = 'en',
 ): Promise<void> {
   await query(
-    `INSERT INTO customer_sessions (customer_email, thread_id, status, last_interaction)
-     VALUES ($1, $2, $3, NOW())
+    `INSERT INTO customer_sessions (customer_email, thread_id, status, language, last_interaction)
+     VALUES ($1, $2, $3, $4, NOW())
      ON CONFLICT (thread_id) DO UPDATE
        SET last_interaction = EXCLUDED.last_interaction,
-           status = EXCLUDED.status`,
-    [customerEmail, threadId, status],
+           status = EXCLUDED.status,
+           language = EXCLUDED.language`,
+    [customerEmail, threadId, status, language],
   );
 }
 

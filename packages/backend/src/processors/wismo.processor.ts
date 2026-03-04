@@ -3,7 +3,7 @@
  * Routes based on WISMO AI classification.
  */
 import { env } from '../config/env.js';
-import { classifyWismo } from '../services/openai.service.js';
+import { classifyWismo, translateEmail } from '../services/openai.service.js';
 import {
   getOrdersByName,
   getOrdersByEmail,
@@ -50,7 +50,9 @@ export async function handleNewEmail(email: ParsedEmail): Promise<void> {
     ai_classification: classification as unknown as Record<string, unknown>,
   });
 
-  // Non-WISMO email → use AI auto-reply
+  const lang = classification.language ?? 'en';
+
+  // Non-WISMO email → use AI auto-reply (already in customer's language via prompt)
   if (!classification.is_wismo) {
     if (classification.auto_reply) {
       await replyToMessage({ threadId, to: senderEmail, body: appendSignature(classification.auto_reply) });
@@ -64,23 +66,24 @@ export async function handleNewEmail(email: ParsedEmail): Promise<void> {
 
   // ── Has order name → search by name ──────────────────────────────────────
   if (hasOrder) {
-    await handleOrderByName(email, classification.order_name!);
+    await handleOrderByName(email, classification.order_name!, lang);
     return;
   }
 
   // ── Has zip code → search by zip + verify email match ────────────────────
   if (hasZip) {
-    await handleOrderByZip(email, classification.zip_code!);
+    await handleOrderByZip(email, classification.zip_code!, lang);
     return;
   }
 
   // ── No identifier → create session and ask for order number ──────────────
-  await createSession(senderEmail, threadId, 'waiting_for_order_number');
-  await replyToMessage({ threadId, to: senderEmail, body: composeAskForOrderNumberEmail() });
+  await createSession(senderEmail, threadId, 'waiting_for_order_number', lang);
+  const askBody = await translateEmail(composeAskForOrderNumberEmail(), lang);
+  await replyToMessage({ threadId, to: senderEmail, body: askBody });
   await logEmail({ thread_id: threadId, route_taken: 'ask_order_number' });
 }
 
-async function handleOrderByName(email: ParsedEmail, orderName: string): Promise<void> {
+async function handleOrderByName(email: ParsedEmail, orderName: string, lang: string): Promise<void> {
   const { threadId, senderEmail, sender, subject, receivedAt } = email;
 
   let orders;
@@ -102,7 +105,8 @@ async function handleOrderByName(email: ParsedEmail, orderName: string): Promise
 
     if (emailOrders.length > 0) {
       const composed = composeOrderDetailsEmail(emailOrders);
-      await replyToMessage({ threadId, to: senderEmail, subject: composed.subject, body: composed.body });
+      const body = await translateEmail(composed.body, lang);
+      await replyToMessage({ threadId, to: senderEmail, subject: composed.subject, body });
       await logEmail({ thread_id: threadId, route_taken: 'order_by_email_fallback' });
     } else {
       await sendHumanAlert(email, `Order "${orderName}" not found in Shopify`);
@@ -112,11 +116,12 @@ async function handleOrderByName(email: ParsedEmail, orderName: string): Promise
   }
 
   const composed = composeOrderDetailsEmail(orders);
-  await replyToMessage({ threadId, to: senderEmail, subject: composed.subject, body: composed.body });
+  const body = await translateEmail(composed.body, lang);
+  await replyToMessage({ threadId, to: senderEmail, subject: composed.subject, body });
   await logEmail({ thread_id: threadId, route_taken: 'order_found_by_name' });
 }
 
-async function handleOrderByZip(email: ParsedEmail, zip: string): Promise<void> {
+async function handleOrderByZip(email: ParsedEmail, zip: string, lang: string): Promise<void> {
   const { threadId, senderEmail } = email;
 
   let orders;
@@ -129,8 +134,9 @@ async function handleOrderByZip(email: ParsedEmail, zip: string): Promise<void> 
 
   if (orders.length === 0) {
     // Zip not found → ask for order number
-    await createSession(senderEmail, threadId, 'waiting_for_order_number');
-    await replyToMessage({ threadId, to: senderEmail, body: composeAskForOrderNumberEmail() });
+    await createSession(senderEmail, threadId, 'waiting_for_order_number', lang);
+    const askBody = await translateEmail(composeAskForOrderNumberEmail(), lang);
+    await replyToMessage({ threadId, to: senderEmail, body: askBody });
     await logEmail({ thread_id: threadId, route_taken: 'zip_not_found_ask_order' });
     return;
   }
@@ -142,14 +148,16 @@ async function handleOrderByZip(email: ParsedEmail, zip: string): Promise<void> 
 
   if (matchedOrders.length === 0) {
     // Email doesn't match → send mismatch message and ask for order number
-    await createSession(senderEmail, threadId, 'waiting_for_order_number');
-    await replyToMessage({ threadId, to: senderEmail, body: composeNoEmailZipMatchEmail() });
+    await createSession(senderEmail, threadId, 'waiting_for_order_number', lang);
+    const mismatchBody = await translateEmail(composeNoEmailZipMatchEmail(), lang);
+    await replyToMessage({ threadId, to: senderEmail, body: mismatchBody });
     await logEmail({ thread_id: threadId, route_taken: 'email_zip_mismatch' });
     return;
   }
 
   const composed = composeOrderDetailsEmail(matchedOrders);
-  await replyToMessage({ threadId, to: senderEmail, subject: composed.subject, body: composed.body });
+  const body = await translateEmail(composed.body, lang);
+  await replyToMessage({ threadId, to: senderEmail, subject: composed.subject, body });
   await logEmail({ thread_id: threadId, route_taken: 'order_found_by_zip' });
 }
 
