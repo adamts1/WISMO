@@ -26,7 +26,7 @@ Analyze the email and return a JSON object with:
 4. "has_ambiguity": (boolean) true if there is a 4-digit number that could be either an order_name or a zip_code and the context isn't 100% clear.
 5. "auto_reply": (string or null)
    - If "is_wismo" is false, generate a polite, kind, and helpful response to the customer's inquiry.
-   - Sign the message as "Oytiot Team".
+   - Do NOT include a sign-off or signature — it will be appended automatically.
    - If "is_wismo" is true, return null for this field.
 
 If information is missing, return null for those fields.`;

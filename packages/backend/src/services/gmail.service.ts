@@ -189,15 +189,17 @@ export async function replyToThread(
 export async function replyToMessage(params: {
   threadId: string;
   to?: string;
+  subject?: string;
   body: string;
   isHtml?: boolean;
 }): Promise<void> {
-  const { threadId, body, isHtml = false, to } = params;
+  const { threadId, body, isHtml = false, to, subject } = params;
 
   // Build the raw MIME message for reply
   const contentType = isHtml ? 'text/html' : 'text/plain';
   const lines = [
     `To: ${to ?? ''}`,
+    ...(subject ? [`Subject: ${subject}`] : []),
     'Content-Type: ' + contentType + '; charset=utf-8',
     'MIME-Version: 1.0',
     '',

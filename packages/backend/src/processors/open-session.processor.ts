@@ -120,7 +120,7 @@ async function handleSearchOrder(email: ParsedEmail, orderNumber: string): Promi
   }
 
   const composed = composeOrderDetailsEmail(orders);
-  await replyToMessage({ threadId, to: senderEmail, body: composed.body });
+  await replyToMessage({ threadId, to: senderEmail, subject: composed.subject, body: composed.body });
   await closeSession(threadId);
 }
 

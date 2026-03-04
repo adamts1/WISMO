@@ -102,7 +102,7 @@ async function handleOrderByName(email: ParsedEmail, orderName: string): Promise
 
     if (emailOrders.length > 0) {
       const composed = composeOrderDetailsEmail(emailOrders);
-      await replyToMessage({ threadId, to: senderEmail, body: composed.body });
+      await replyToMessage({ threadId, to: senderEmail, subject: composed.subject, body: composed.body });
       await logEmail({ thread_id: threadId, route_taken: 'order_by_email_fallback' });
     } else {
       await sendHumanAlert(email, `Order "${orderName}" not found in Shopify`);
@@ -112,7 +112,7 @@ async function handleOrderByName(email: ParsedEmail, orderName: string): Promise
   }
 
   const composed = composeOrderDetailsEmail(orders);
-  await replyToMessage({ threadId, to: senderEmail, body: composed.body });
+  await replyToMessage({ threadId, to: senderEmail, subject: composed.subject, body: composed.body });
   await logEmail({ thread_id: threadId, route_taken: 'order_found_by_name' });
 }
 
@@ -149,7 +149,7 @@ async function handleOrderByZip(email: ParsedEmail, zip: string): Promise<void> 
   }
 
   const composed = composeOrderDetailsEmail(matchedOrders);
-  await replyToMessage({ threadId, to: senderEmail, body: composed.body });
+  await replyToMessage({ threadId, to: senderEmail, subject: composed.subject, body: composed.body });
   await logEmail({ thread_id: threadId, route_taken: 'order_found_by_zip' });
 }
 
