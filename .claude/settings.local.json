@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/Users/adamtsityat/Library/pnpm/pnpm --filter @oytiot/backend build)"
+    ]
+  }
+}
