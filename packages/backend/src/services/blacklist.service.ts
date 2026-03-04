@@ -4,7 +4,7 @@ const BLOCKED_DOMAINS = ['info.printful.com'];
 
 function getBlockedEmails(): string[] {
   return [
-    'adamtsityat@gmail.com',
+    'tsityat.ai.agency@gmail.com',
     env.EMAIL_TEST,
     env.EMAIL_PROD,
   ].filter((e): e is string => Boolean(e));

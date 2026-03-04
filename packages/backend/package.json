@@ -9,6 +9,7 @@
     "build": "tsc",
     "start": "node --env-file=.env dist/server.js",
     "test": "tsx --env-file=.env src/test.ts",
+    "stop": "lsof -ti:3000 | xargs kill -9 2>/dev/null && echo 'Backend stopped' || echo 'Nothing on port 3000'",
     "setup-gmail": "tsx --env-file=.env src/setup-gmail-watch.ts"
   },
   "dependencies": {

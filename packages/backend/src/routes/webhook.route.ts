@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import { decodePushPayload } from '../services/gmail.service.js';
+import { decodePushPayload, getSelfEmail } from '../services/gmail.service.js';
 import { processGmailPush } from '../processors/email.processor.js';
 
 // In-memory guard: ignore duplicate historyIds within a 30-second window
@@ -26,9 +26,16 @@ export async function webhookRoutes(app: FastifyInstance): Promise<void> {
         return;
       }
 
-      const { historyId } = decodePushPayload(data);
+      const { emailAddress, historyId } = decodePushPayload(data);
       if (!historyId) {
         console.warn('[webhook] Push payload missing historyId');
+        return;
+      }
+
+      // Ignore pushes from other Gmail accounts (e.g. old watch still active)
+      const myEmail = await getSelfEmail();
+      if (emailAddress && emailAddress.toLowerCase() !== myEmail) {
+        console.log(`[webhook] Ignoring push from ${emailAddress} (expected ${myEmail})`);
         return;
       }
 
