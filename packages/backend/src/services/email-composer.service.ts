@@ -22,13 +22,15 @@ export function composeOrderDetailsEmail(orders: ShopifyOrder[]): {
     body += `Status: ${order.order_fulfillment_status}\n`;
 
     if (order.tracking.length > 0) {
+      const total = order.tracking.length;
       const trackingLines = order.tracking
         .map((t) => {
           const url = resolveTrackingUrl(t.carrier, t.tracking_number, t.tracking_url);
           return `• Carrier: ${t.carrier ?? 'Unknown'} | Tracking: ${url ?? 'N/A'}`;
         })
         .join('\n');
-      body += `Tracking Info:\n${trackingLines}\n`;
+      const shipmentHeader = total > 1 ? `Tracking Info (${total} shipments):\n` : 'Tracking Info:\n';
+      body += `${shipmentHeader}${trackingLines}\n`;
     } else if (order.order_fulfillment_status === 'FULFILLED') {
       body += 'Tracking Info: Updated in your account.\n';
     } else {
