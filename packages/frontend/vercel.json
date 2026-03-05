@@ -1,0 +1,9 @@
+{
+  "buildCommand": "cd ../.. && pnpm --filter @oytiot/shared build && pnpm --filter @oytiot/frontend build",
+  "outputDirectory": "dist",
+  "installCommand": "cd ../.. && pnpm install",
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "$BACKEND_URL/api/:path*" }
+  ]
+}
