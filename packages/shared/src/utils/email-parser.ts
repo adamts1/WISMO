@@ -10,18 +10,23 @@ export function extractEmail(raw: string): string {
  * Strip email thread history from content (quoted replies, "On ... wrote:", etc.)
  */
 export function stripThreadHistory(content: string): string {
+  // Normalise line endings to \n
+  const normalised = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
   const threadMarkers = [
-    /\n\s*On .* wrote:/i,
-    /\n\s*Le .* a écrit\s?:/i,          // French: "Le 8 mars 2026 à 11:52, x@y a écrit :"
-    /\n\s*El .* escribió:/i,            // Spanish
-    /\n\s*Am .* schrieb .+:/i,          // German
-    /\n\s*ב.* כתב\/ה:/i,               // Hebrew
-    /\n\s*---Original Message---/i,
-    /\n\s*-{2,}\s*Forwarded message/i,
+    /\n\s*On .* wrote:\s*$/im,
+    /\n\s*Le .*\ba .crit\s*:\s*$/im,       // French ("a écrit :" — flexible for encoding)
+    /\n\s*El .* escribi.:\s*$/im,           // Spanish
+    /\n\s*Am .* schrieb .+:\s*$/im,         // German
+    /\n\s*.*כתב.*:\s*$/im,                  // Hebrew
+    /\n\s*---+\s*Original Message/im,
+    /\n\s*-{2,}\s*Forwarded message/im,
+    /\n\s*_{5,}/m,                          // _____ separator lines
+    /\n[^\n]*\b\w+@\w+\.\w+\b.*(?:wrote|écrit|escribi|schrieb|כתב)\s*:?\s*$/im, // generic: "email ... wrote:"
     /\n\s*> /,
   ];
 
-  let result = content;
+  let result = normalised;
   for (const marker of threadMarkers) {
     const match = result.match(marker);
     if (match && match.index !== undefined) {
