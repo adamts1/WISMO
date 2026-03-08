@@ -116,7 +116,7 @@ async function handleSearchOrder(email: ParsedEmail, orderNumber: string, lang: 
       `Please double-check the number and reply again, or a team member will assist you shortly.\n\nOytiot Team`,
       lang,
     );
-    await replyToMessage({ threadId, to: senderEmail, body: notFoundBody });
+    await replyToMessage({ threadId, to: senderEmail, subject: 'Order not found', body: notFoundBody });
     await incrementAttempts(threadId);
     return;
   }
@@ -131,7 +131,7 @@ async function handleGuideMail(email: ParsedEmail, session: CustomerSession): Pr
   const { threadId, senderEmail } = email;
   const lang = session.language ?? 'en';
   const htmlBody = await translateEmail(composeAskForOrderNumberHtml(), lang);
-  await replyToMessage({ threadId, to: senderEmail, body: htmlBody, isHtml: true });
+  await replyToMessage({ threadId, to: senderEmail, subject: 'How to find your order number', body: htmlBody, isHtml: true });
   await incrementAttempts(threadId);
 }
 
@@ -145,13 +145,13 @@ async function handleNeedHumanSupport(email: ParsedEmail, lang: string): Promise
   });
 
   // Notify the human handler
-  await replyToMessage({ threadId, to: env.EMAIL_NISSAN, body: alertBody });
+  await replyToMessage({ threadId, to: env.EMAIL_NISSAN, subject: 'Customer needs assistance', body: alertBody });
   // Tell the customer a human will help
   const patientBody = await translateEmail(
     `Hi there,\n\nThank you for your patience. A member of our team will get back to you shortly.\n\nOytiot Team`,
     lang,
   );
-  await replyToMessage({ threadId, to: email.senderEmail, body: patientBody });
+  await replyToMessage({ threadId, to: email.senderEmail, subject: 'We\'re on it', body: patientBody });
   await closeSession(threadId);
 }
 
@@ -169,7 +169,7 @@ async function handleOnlyReply(
       `You're welcome! Feel free to reach out anytime.\n\nOytiot Team`,
       lang,
     );
-    await replyToMessage({ threadId, to: email.senderEmail, body: thankBody });
+    await replyToMessage({ threadId, to: email.senderEmail, subject: 'Thank you!', body: thankBody });
     await closeSession(threadId);
     return;
   }
@@ -179,6 +179,6 @@ async function handleOnlyReply(
     `Hi there,\n\nThank you for your message! To help you faster, please share your order number and we'll get right on it.`,
     lang,
   );
-  await replyToMessage({ threadId, to: email.senderEmail, body: appendSignature(ackBody) });
+  await replyToMessage({ threadId, to: email.senderEmail, subject: 'We need your order number', body: appendSignature(ackBody) });
   await incrementAttempts(threadId);
 }

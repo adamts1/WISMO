@@ -55,7 +55,7 @@ export async function handleNewEmail(email: ParsedEmail): Promise<void> {
   // Non-WISMO email → use AI auto-reply (already in customer's language via prompt)
   if (!classification.is_wismo) {
     if (classification.auto_reply) {
-      await replyToMessage({ threadId, to: senderEmail, body: appendSignature(classification.auto_reply) });
+      await replyToMessage({ threadId, to: senderEmail, subject: 'Re: Your inquiry', body: appendSignature(classification.auto_reply) });
       await logEmail({ thread_id: threadId, route_taken: 'auto_reply_non_wismo' });
     }
     return;
@@ -172,6 +172,7 @@ async function sendHumanAlert(email: ParsedEmail, reason: string): Promise<void>
   await replyToMessage({
     threadId: email.threadId,
     to: env.EMAIL_NISSAN,
+    subject: 'Customer needs assistance',
     body,
   });
 }
