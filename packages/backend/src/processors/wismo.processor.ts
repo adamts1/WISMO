@@ -171,7 +171,7 @@ async function sendHumanAlert(email: ParsedEmail, reason: string): Promise<void>
 
   await replyToMessage({
     threadId: email.threadId,
-    to: env.EMAIL_NISSAN,
+    to: env.EMAIL_PROD ?? env.EMAIL_NISSAN,
     subject: 'Customer needs assistance',
     body,
   });
