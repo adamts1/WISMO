@@ -9,6 +9,7 @@ export interface ParsedEmail {
   cleanContent: string;
   receivedAt: string;
   isReply: boolean;
+  isAutoReply: boolean;
 }
 
 export interface EmailReply {

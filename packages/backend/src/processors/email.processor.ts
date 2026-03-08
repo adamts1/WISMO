@@ -72,6 +72,18 @@ export async function processGmailPush(pushHistoryId: string): Promise<void> {
     return;
   }
 
+  // 5b. Skip auto-reply / out-of-office emails
+  if (email.isAutoReply) {
+    console.log(`[email.processor] Skipping auto-reply from ${email.senderEmail}`);
+    await logEmail({
+      thread_id: email.threadId,
+      sender_email: email.senderEmail,
+      subject: email.subject,
+      route_taken: 'auto_reply_skipped',
+    });
+    return;
+  }
+
   // 6. Check for open session
   let session;
   try {

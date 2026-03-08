@@ -148,6 +148,19 @@ export function parseGmailMessage(message: gmail_v1.Schema$Message): ParsedEmail
   const cleanContent = stripThreadHistory(content);
   const isReply = subject.toLowerCase().startsWith('re:');
 
+  // Detect auto-reply / out-of-office emails via standard headers
+  const autoSubmitted = getHeader('Auto-Submitted').toLowerCase();
+  const precedence = getHeader('Precedence').toLowerCase();
+  const xAutoReply = getHeader('X-Autoreply').toLowerCase();
+  const xAutoResponseSuppress = getHeader('X-Auto-Response-Suppress');
+  const isAutoReply =
+    (autoSubmitted !== '' && autoSubmitted !== 'no') ||
+    precedence === 'auto_reply' ||
+    precedence === 'bulk' ||
+    precedence === 'junk' ||
+    xAutoReply === 'yes' ||
+    xAutoResponseSuppress !== '';
+
   return {
     messageId: message.id ?? '',
     threadId: message.threadId ?? '',
@@ -159,6 +172,7 @@ export function parseGmailMessage(message: gmail_v1.Schema$Message): ParsedEmail
     cleanContent,
     receivedAt,
     isReply,
+    isAutoReply,
   };
 }
 
