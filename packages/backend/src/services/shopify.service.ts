@@ -71,15 +71,27 @@ const ORDER_FIELDS = /* GraphQL */ `
 function mapOrderNode(node: any): ShopifyOrder {
   const tracking = (node.fulfillments ?? []).flatMap(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (f: any) =>
+    (f: any) => {
+      const infos = f.trackingInfo ?? [];
+      // Fulfillment exists but has no tracking info yet — still include it
+      if (infos.length === 0) {
+        return [{
+          carrier: null,
+          tracking_number: null,
+          tracking_url: null,
+          fulfillment_status: f.status ?? null,
+          fulfillment_created_at: f.createdAt ?? null,
+        }];
+      }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (f.trackingInfo ?? []).map((t: any) => ({
+      return infos.map((t: any) => ({
         carrier: t.company ?? null,
         tracking_number: t.number ?? null,
         tracking_url: resolveTrackingUrl(t.company, t.number, t.url),
         fulfillment_status: f.status ?? null,
         fulfillment_created_at: f.createdAt ?? null,
-      })),
+      }));
+    },
   );
 
   const pendingItems = (node.fulfillmentOrders?.nodes ?? []).flatMap(

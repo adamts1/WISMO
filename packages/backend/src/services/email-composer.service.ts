@@ -24,7 +24,10 @@ export function composeOrderDetailsEmail(orders: ShopifyOrder[]): {
     if (order.tracking.length > 0) {
       const total = order.tracking.length;
       const trackingLines = order.tracking
-        .map((t) => {
+        .map((t, i) => {
+          if (!t.tracking_number) {
+            return `• Shipment ${i + 1}: Shipped — tracking not yet available`;
+          }
           const url = resolveTrackingUrl(t.carrier, t.tracking_number, t.tracking_url);
           return `• Carrier: ${t.carrier ?? 'Unknown'} | Tracking: ${url ?? 'N/A'}`;
         })
