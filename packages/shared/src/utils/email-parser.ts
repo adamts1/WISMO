@@ -12,7 +12,12 @@ export function extractEmail(raw: string): string {
 export function stripThreadHistory(content: string): string {
   const threadMarkers = [
     /\n\s*On .* wrote:/i,
+    /\n\s*Le .* a écrit\s?:/i,          // French: "Le 8 mars 2026 à 11:52, x@y a écrit :"
+    /\n\s*El .* escribió:/i,            // Spanish
+    /\n\s*Am .* schrieb .+:/i,          // German
+    /\n\s*ב.* כתב\/ה:/i,               // Hebrew
     /\n\s*---Original Message---/i,
+    /\n\s*-{2,}\s*Forwarded message/i,
     /\n\s*> /,
   ];
 
@@ -31,9 +36,19 @@ export function stripThreadHistory(content: string): string {
  * Returns e.g. "#1234" or null.
  */
 export function extractOrderNumber(text: string): string | null {
-  const match = text.match(/#?\b(\d{4})\b/);
-  if (!match) return null;
-  return match[0].startsWith('#') ? match[0] : `#${match[0]}`;
+  // Try explicit #1234 first
+  const hashMatch = text.match(/#(\d{4})\b/);
+  if (hashMatch) return hashMatch[0];
+
+  // Try bare 4-digit numbers, but skip years (2020–2039) and timestamps
+  const barePattern = /\b(\d{4})\b/g;
+  let m;
+  while ((m = barePattern.exec(text)) !== null) {
+    const num = parseInt(m[1], 10);
+    if (num >= 2020 && num <= 2039) continue; // skip years
+    return `#${m[1]}`;
+  }
+  return null;
 }
 
 /**
