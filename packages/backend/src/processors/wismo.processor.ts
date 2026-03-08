@@ -79,7 +79,7 @@ export async function handleNewEmail(email: ParsedEmail): Promise<void> {
   // ── No identifier → create session and ask for order number ──────────────
   await createSession(senderEmail, threadId, 'waiting_for_order_number', lang);
   const askBody = await translateEmail(composeAskForOrderNumberEmail(), lang);
-  await replyToMessage({ threadId, to: senderEmail, body: askBody });
+  await replyToMessage({ threadId, to: senderEmail, subject: 'We need your order number', body: askBody });
   await logEmail({ thread_id: threadId, route_taken: 'ask_order_number' });
 }
 
@@ -136,7 +136,7 @@ async function handleOrderByZip(email: ParsedEmail, zip: string, lang: string): 
     // Zip not found → ask for order number
     await createSession(senderEmail, threadId, 'waiting_for_order_number', lang);
     const askBody = await translateEmail(composeAskForOrderNumberEmail(), lang);
-    await replyToMessage({ threadId, to: senderEmail, body: askBody });
+    await replyToMessage({ threadId, to: senderEmail, subject: 'We need your order number', body: askBody });
     await logEmail({ thread_id: threadId, route_taken: 'zip_not_found_ask_order' });
     return;
   }
@@ -150,7 +150,7 @@ async function handleOrderByZip(email: ParsedEmail, zip: string, lang: string): 
     // Email doesn't match → send mismatch message and ask for order number
     await createSession(senderEmail, threadId, 'waiting_for_order_number', lang);
     const mismatchBody = await translateEmail(composeNoEmailZipMatchEmail(), lang);
-    await replyToMessage({ threadId, to: senderEmail, body: mismatchBody });
+    await replyToMessage({ threadId, to: senderEmail, subject: 'We need your order number', body: mismatchBody });
     await logEmail({ thread_id: threadId, route_taken: 'email_zip_mismatch' });
     return;
   }
