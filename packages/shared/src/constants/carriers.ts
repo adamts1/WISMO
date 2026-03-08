@@ -28,5 +28,13 @@ export function resolveTrackingUrl(
   if (key.includes('fedex')) return CARRIER_TEMPLATES['fedex'] + trackingNumber;
   if (key.includes('usps')) return CARRIER_TEMPLATES['usps'] + trackingNumber;
 
-  return fallbackUrl ?? trackingNumber;
+  // No carrier match — prefer any URL (Shopify-provided like myorders.co) over bare number
+  if (fallbackUrl) return fallbackUrl;
+
+  // Build mailingtechnology URL for tracking numbers that look like international postal (2 letters + digits + 2 letters)
+  if (/^[A-Z]{2}\d{9,}[A-Z]{2}$/i.test(trackingNumber)) {
+    return CARRIER_TEMPLATES['mailingtechnology'] + trackingNumber;
+  }
+
+  return trackingNumber;
 }
