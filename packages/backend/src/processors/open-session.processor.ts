@@ -17,6 +17,7 @@ import {
   appendSignature,
 } from '../services/email-composer.service.js';
 import { logEmail } from '../services/email-log.service.js';
+import { logHumanHandling } from '../services/human-handling.service.js';
 import { extractOrderNumber } from '@oytiot/shared';
 import type { ParsedEmail, ShopifyOrder, CustomerSession, SessionRoute } from '@oytiot/shared';
 
@@ -137,11 +138,12 @@ async function handleGuideMail(email: ParsedEmail, session: CustomerSession): Pr
 
 async function handleNeedHumanSupport(email: ParsedEmail, lang: string): Promise<void> {
   const { threadId } = email;
+  const reason = 'Customer requires human intervention (too many attempts or complex request)';
   const alertBody = composeHumanAlertEmail({
     sender: email.sender,
     subject: email.subject,
     receivedAt: email.receivedAt,
-    reason: 'Customer requires human intervention (too many attempts or complex request)',
+    reason,
   });
 
   // Notify the human handler
@@ -153,6 +155,14 @@ async function handleNeedHumanSupport(email: ParsedEmail, lang: string): Promise
   );
   await replyToMessage({ threadId, to: email.senderEmail, subject: 'We\'re on it', body: patientBody });
   await closeSession(threadId);
+
+  await logHumanHandling({
+    thread_id: threadId,
+    sender_email: email.senderEmail,
+    subject: email.subject,
+    reason,
+    source: 'open_session',
+  });
 }
 
 async function handleOnlyReply(

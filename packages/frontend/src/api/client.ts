@@ -6,6 +6,7 @@ import type {
   BlacklistEntry,
   CustomerSession,
   ShopifyOrder,
+  HumanHandlingResponse,
 } from '@oytiot/shared';
 
 const BASE = '/api';
@@ -95,5 +96,18 @@ export const api = {
 
   removeBlacklistEntry(id: number): Promise<{ ok: boolean }> {
     return del(`/blacklist/${id}`);
+  },
+
+  getHumanHandling(params?: {
+    source?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<HumanHandlingResponse> {
+    const qs = new URLSearchParams();
+    if (params?.source) qs.set('source', params.source);
+    if (params?.limit) qs.set('limit', String(params.limit));
+    if (params?.offset) qs.set('offset', String(params.offset));
+    const query = qs.toString() ? `?${qs.toString()}` : '';
+    return get(`/human-handling${query}`);
   },
 };

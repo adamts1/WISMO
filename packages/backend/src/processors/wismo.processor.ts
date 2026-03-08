@@ -20,6 +20,7 @@ import {
   appendSignature,
 } from '../services/email-composer.service.js';
 import { logEmail } from '../services/email-log.service.js';
+import { logHumanHandling } from '../services/human-handling.service.js';
 import type { ParsedEmail, ShopifyOrder } from '@oytiot/shared';
 
 export async function handleNewEmail(email: ParsedEmail): Promise<void> {
@@ -174,5 +175,13 @@ async function sendHumanAlert(email: ParsedEmail, reason: string): Promise<void>
     to: env.EMAIL_PROD ?? env.EMAIL_TEST,
     subject: 'Customer needs assistance',
     body,
+  });
+
+  await logHumanHandling({
+    thread_id: email.threadId,
+    sender_email: email.senderEmail,
+    subject: email.subject,
+    reason,
+    source: 'wismo',
   });
 }
