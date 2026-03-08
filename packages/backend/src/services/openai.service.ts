@@ -21,6 +21,7 @@ Analyze the email and return a JSON object with:
 2. "order_name": (string or null) Look for a 4-digit number.
    - Prioritize this if it follows '#', 'order', 'ID', or 'number'.
    - If a 4-digit number stands alone without context, assign it here first.
+   - NEVER treat years (2020–2039) as order numbers. Ignore numbers that appear in dates or timestamps (e.g. "Le 8 mars 2026", "March 2026", "2025-01-15").
 3. "zip_code": (string or null) Look for a 4-10 digit/character sequence.
    - Assign here ONLY if it's explicitly called 'zip', 'postal code', or is mentioned next to a city/state/address.
 4. "has_ambiguity": (boolean) true if there is a 4-digit number that could be either an order_name or a zip_code and the context isn't 100% clear.
