@@ -61,7 +61,7 @@ export async function processGmailPush(pushHistoryId: string): Promise<void> {
   }
 
   // 5. Blacklist check
-  if (isBlacklisted(email.senderEmail, email.senderDomain)) {
+  if (await isBlacklisted(email.senderEmail, email.senderDomain)) {
     console.log(`[email.processor] Blocked email from ${email.senderEmail}`);
     await logEmail({
       thread_id: email.threadId,

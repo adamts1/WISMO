@@ -61,7 +61,7 @@ export async function testRoutes(app: FastifyInstance): Promise<void> {
     }
 
     // 5. Blacklist check
-    if (isBlacklisted(email.senderEmail, email.senderDomain)) {
+    if (await isBlacklisted(email.senderEmail, email.senderDomain)) {
       return reply.send({ ok: false, error: 'Sender is blacklisted', sender: email.senderEmail });
     }
 

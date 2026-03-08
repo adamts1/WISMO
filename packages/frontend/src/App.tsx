@@ -4,6 +4,7 @@ import { Dashboard } from './pages/Dashboard';
 import { Sessions } from './pages/Sessions';
 import { EmailLog } from './pages/EmailLog';
 import { OrderLookup } from './pages/OrderLookup';
+import { Blacklist } from './pages/Blacklist';
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
           <Route path="/sessions" element={<Sessions />} />
           <Route path="/emails" element={<EmailLog />} />
           <Route path="/orders" element={<OrderLookup />} />
+          <Route path="/blacklist" element={<Blacklist />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AppShell>
