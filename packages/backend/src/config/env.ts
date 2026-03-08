@@ -18,9 +18,8 @@ const EnvSchema = z.object({
   SUPABASE_URL: z.string().url(),
   SUPABASE_SERVICE_KEY: z.string().min(1),
 
-  EMAIL_NISSAN: z.string().email(),
+  EMAIL_PROD: z.string().email(),
   EMAIL_TEST: z.string().email().optional(),
-  EMAIL_PROD: z.string().email().optional(),
 });
 
 const parsed = EnvSchema.safeParse(process.env);

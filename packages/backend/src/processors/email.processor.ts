@@ -45,7 +45,7 @@ export async function processGmailPush(pushHistoryId: string): Promise<void> {
   // 4. Self-email filter: ignore emails sent by the bot itself
   // Uses both env vars AND the Gmail account's actual email (fetched from API)
   const gmailSelf = await getSelfEmail();
-  const selfEmails = [env.EMAIL_PROD, env.EMAIL_TEST, env.EMAIL_NISSAN, gmailSelf]
+  const selfEmails = [env.EMAIL_PROD, env.EMAIL_TEST, gmailSelf]
     .filter((e): e is string => Boolean(e))
     .map((e) => e.toLowerCase());
   if (selfEmails.includes(email.senderEmail.toLowerCase())) {

@@ -145,7 +145,7 @@ async function handleNeedHumanSupport(email: ParsedEmail, lang: string): Promise
   });
 
   // Notify the human handler
-  await replyToMessage({ threadId, to: env.EMAIL_PROD ?? env.EMAIL_NISSAN, subject: 'Customer needs assistance', body: alertBody });
+  await replyToMessage({ threadId, to: env.EMAIL_PROD, subject: 'Customer needs assistance', body: alertBody });
   // Tell the customer a human will help
   const patientBody = await translateEmail(
     `Hi there,\n\nThank you for your patience. A member of our team will get back to you shortly.\n\nOytiot Team`,

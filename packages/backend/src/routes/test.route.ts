@@ -48,7 +48,7 @@ export async function testRoutes(app: FastifyInstance): Promise<void> {
 
     // 4. Self-email check
     const gmailSelf = await getSelfEmail();
-    const selfEmails = [env.EMAIL_PROD, env.EMAIL_TEST, env.EMAIL_NISSAN, gmailSelf]
+    const selfEmails = [env.EMAIL_PROD, env.EMAIL_TEST, gmailSelf]
       .filter((e): e is string => Boolean(e))
       .map((e) => e.toLowerCase());
 
