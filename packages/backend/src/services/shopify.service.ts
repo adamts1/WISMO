@@ -50,6 +50,19 @@ const ORDER_FIELDS = /* GraphQL */ `
       requestStatus
       assignedLocation { name }
       deliveryMethod { methodType }
+      fulfillments(first: 10) {
+        edges {
+          node {
+            status
+            createdAt
+            trackingInfo {
+              company
+              number
+              url
+            }
+          }
+        }
+      }
       lineItems(first: 50) {
         nodes {
           totalQuantity
@@ -69,11 +82,11 @@ const ORDER_FIELDS = /* GraphQL */ `
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapOrderNode(node: any): ShopifyOrder {
-  const tracking = (node.fulfillments ?? []).flatMap(
+  // Extract tracking from Order.fulfillments
+  const trackingFromFulfillments = (node.fulfillments ?? []).flatMap(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (f: any) => {
       const infos = f.trackingInfo ?? [];
-      // Fulfillment exists but has no tracking info yet — still include it
       if (infos.length === 0) {
         return [{
           carrier: null,
@@ -93,6 +106,36 @@ function mapOrderNode(node: any): ShopifyOrder {
       }));
     },
   );
+
+  // Also extract tracking from fulfillmentOrders (catches POD/3PL fulfillments)
+  const trackingFromFO = (node.fulfillmentOrders?.nodes ?? []).flatMap(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (fo: any) => (fo.fulfillments?.edges ?? []).flatMap(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (edge: any) => {
+        const f = edge.node;
+        const infos = f.trackingInfo ?? [];
+        if (infos.length === 0) return [];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return infos.map((t: any) => ({
+          carrier: t.company ?? null,
+          tracking_number: t.number ?? null,
+          tracking_url: resolveTrackingUrl(t.company, t.number, t.url),
+          fulfillment_status: f.status ?? null,
+          fulfillment_created_at: f.createdAt ?? null,
+        }));
+      },
+    ),
+  );
+
+  // Merge and deduplicate by tracking number
+  const seen = new Set<string>();
+  const tracking = [...trackingFromFulfillments, ...trackingFromFO].filter((t) => {
+    if (!t.tracking_number) return true; // keep entries without tracking numbers
+    if (seen.has(t.tracking_number)) return false;
+    seen.add(t.tracking_number);
+    return true;
+  });
 
   const pendingItems = (node.fulfillmentOrders?.nodes ?? []).flatMap(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -185,6 +228,19 @@ export async function getOrdersByZip(zip: string): Promise<ShopifyOrder[]> {
                 id
                 status
                 requestStatus
+                fulfillments(first: 10) {
+                  edges {
+                    node {
+                      status
+                      createdAt
+                      trackingInfo {
+                        company
+                        number
+                        url
+                      }
+                    }
+                  }
+                }
                 lineItems(first: 50) {
                   nodes {
                     totalQuantity

@@ -6,6 +6,7 @@ export const CARRIER_TEMPLATES: Record<string, string> = {
   usps: 'https://tools.usps.com/go/TrackConfirmAction?tLabels=',
   evri: 'https://www.evri.com/track/parcel/',
   mailingtechnology: 'https://mailingtechnology.com/tracking/?tn=',
+  spring: 'https://www.spring-gds.com/tracking?barcode=',
 };
 
 export function resolveTrackingUrl(
@@ -27,6 +28,8 @@ export function resolveTrackingUrl(
   if (key.includes('ups')) return CARRIER_TEMPLATES['ups'] + trackingNumber;
   if (key.includes('fedex')) return CARRIER_TEMPLATES['fedex'] + trackingNumber;
   if (key.includes('usps')) return CARRIER_TEMPLATES['usps'] + trackingNumber;
+  if (key.includes('spring'))
+    return `https://www.spring-gds.com/tracking?barcode=${trackingNumber}`;
 
   // No carrier match — prefer any URL (Shopify-provided like myorders.co) over bare number
   if (fallbackUrl) return fallbackUrl;
