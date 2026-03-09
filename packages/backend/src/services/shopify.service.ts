@@ -202,56 +202,7 @@ export async function getOrdersByZip(zip: string): Promise<ShopifyOrder[]> {
   const query = /* GraphQL */ `
     query GetOrdersByZip($query: String!) {
       orders(first: 10, query: $query) {
-        edges {
-          node {
-            id
-            name
-            email
-            displayFulfillmentStatus
-            createdAt
-            shippingAddress {
-              address1
-              city
-              zip
-              name
-            }
-            fulfillments {
-              status
-              trackingInfo {
-                company
-                number
-                url
-              }
-            }
-            fulfillmentOrders(first: 10) {
-              nodes {
-                id
-                status
-                requestStatus
-                fulfillments(first: 10) {
-                  edges {
-                    node {
-                      status
-                      createdAt
-                      trackingInfo {
-                        company
-                        number
-                        url
-                      }
-                    }
-                  }
-                }
-                lineItems(first: 50) {
-                  nodes {
-                    totalQuantity
-                    remainingQuantity
-                    lineItem { id title sku }
-                  }
-                }
-              }
-            }
-          }
-        }
+        edges { node { ${ORDER_FIELDS} } }
       }
     }
   `;
