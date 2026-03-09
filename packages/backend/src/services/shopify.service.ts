@@ -156,12 +156,19 @@ function mapOrderNode(node: any): ShopifyOrder {
         })),
   );
 
+  const lineItems = (node.lineItems?.nodes ?? []).map((li: any) => ({
+    title: li.title ?? 'Unknown item',
+    quantity: li.quantity ?? 1,
+    sku: li.sku ?? null,
+  }));
+
   return {
     order_id: node.id,
     order_name: node.name,
     email: node.email,
     created_at: node.createdAt,
     order_fulfillment_status: node.displayFulfillmentStatus,
+    line_items: lineItems,
     tracking,
     pending_items: pendingItems,
     shipping_address: node.shippingAddress ?? null,

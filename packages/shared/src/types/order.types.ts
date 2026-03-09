@@ -15,12 +15,19 @@ export interface PendingItem {
   fulfillment_order_status: string | null;
 }
 
+export interface LineItem {
+  title: string;
+  quantity: number;
+  sku: string | null;
+}
+
 export interface ShopifyOrder {
   order_id: string;
   order_name: string;
   email: string;
   created_at: string;
   order_fulfillment_status: string;
+  line_items: LineItem[];
   tracking: TrackingInfo[];
   pending_items: PendingItem[];
   shipping_address: {

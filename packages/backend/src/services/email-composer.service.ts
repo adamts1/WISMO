@@ -21,6 +21,14 @@ export function composeOrderDetailsEmail(orders: ShopifyOrder[]): {
     body += `ORDER ${order.order_name}\n`;
     body += `Status: ${order.order_fulfillment_status}\n`;
 
+    if (order.line_items.length > 0) {
+      body += 'Items:\n';
+      body += order.line_items
+        .map((li) => `  - ${li.title} (x${li.quantity})`)
+        .join('\n');
+      body += '\n';
+    }
+
     if (order.tracking.length > 0) {
       const total = order.tracking.length;
       const trackingLines = order.tracking
